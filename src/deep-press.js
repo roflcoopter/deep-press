@@ -12,12 +12,19 @@ customElements.whenDefined('ha-card').then(() => {
       document.addEventListener(
         ev,
         () => {
-          document.querySelector("body > home-assistant")
-                  .shadowRoot.querySelector("home-assistant-main")
-                  .shadowRoot.querySelector("app-drawer-layout > partial-panel-resolver > ha-panel-lovelace")
-                  .shadowRoot.querySelector("hui-root")
-                  .shadowRoot.querySelector("#view > hui-view")
-                  .style.webkitFilter= 'blur(0px)';
+          try {
+            document.querySelector("body > home-assistant")
+                    .shadowRoot.querySelector("home-assistant-main")
+                    .shadowRoot.querySelector("app-drawer-layout > partial-panel-resolver > ha-panel-lovelace")
+                    .shadowRoot.querySelector("hui-root")
+                    .shadowRoot.querySelector("#view > hui-view")
+                    .style.webkitFilter= 'blur(0px)';
+          } catch(err) {
+            if (!(err instanceof TypeError)) {
+              throw err
+            }
+          }
+
           setTimeout(function () {
             var modal = document.querySelector("body > home-assistant").shadowRoot.querySelector("ha-more-info-dialog");
             if (modal) {
