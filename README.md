@@ -1,7 +1,4 @@
 # Deep Press Mod for Lovelace
-
-[![](https://img.shields.io/github/release/roflcoopter/deep-press.svg?style=flat-square)](https://github.com/roflcoopter/deep-press/releases/latest)
-
 This is not really a card, it adds deep press functionality to already existing cards in [Home Assistant](https://github.com/home-assistant/home-assistant) Lovelace UI.
 It can be used to mimic an iOS interface.
 
