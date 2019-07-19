@@ -1,0 +1,38 @@
+{
+  "name": "deep-press",
+  "version": "1.0.0",
+  "description": "Adds deep press (3D touch) to Lovelace cards",
+  "main": "src/deep-press.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack --mode=production",
+    "watch": "webpack --mode=development --watch "
+  },
+  "keywords": [
+    "home-assistant",
+    "homeassistant",
+    "hass",
+    "automation",
+    "lovelace",
+    "3D-touch",
+    "force-touch",
+    "deep-press",
+    "custom-cards"
+  ],
+  "author": "Jesper Nilsson <jespernilsson93@hotmail.se>",
+  "repository": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/core": "^7.3.4",
+    "@babel/plugin-transform-template-literals": "^7.2.0",
+    "@babel/preset-env": "^7.3.4",
+    "babel-loader": "^8.0.5",
+    "url-loader": "^1.1.2",
+    "webpack": "^4.36.1",
+    "webpack-cli": "^3.3.6"
+  },
+  "dependencies": {
+    "custom-card-helpers": "^1.2.2",
+    "pressure": "^2.1.2"
+  }
+}
