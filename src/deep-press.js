@@ -29,6 +29,7 @@ customElements.whenDefined('ha-card').then(() => {
             var modal = document.querySelector("body > home-assistant").shadowRoot.querySelector("ha-more-info-dialog");
             if (modal) {
               modal.noCancelOnOutsideClick = false;
+              modal.style.pointerEvents = "all";
             }
           }, 100);
         },
@@ -92,6 +93,7 @@ customElements.whenDefined('ha-card').then(() => {
           this.deep_press = true;
           handleClick(this, null, config, true, false);
           document.querySelector("body > home-assistant").shadowRoot.querySelector("ha-more-info-dialog").noCancelOnOutsideClick = true;
+          document.querySelector("body > home-assistant").shadowRoot.querySelector("ha-more-info-dialog").style.pointerEvents = "none";
         }
       },
 
