@@ -91,7 +91,7 @@ customElements.whenDefined('ha-card').then(() => {
       startDeepPress: function(event){
         if (!this.deep_press) {
           this.deep_press = true;
-          handleClick(this, null, config, true, false);
+          handleClick(this, coverParent.hass, config, true, false);
           document.querySelector("body > home-assistant").shadowRoot.querySelector("ha-more-info-dialog").noCancelOnOutsideClick = true;
           document.querySelector("body > home-assistant").shadowRoot.querySelector("ha-more-info-dialog").style.pointerEvents = "none";
         }
