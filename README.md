@@ -69,6 +69,30 @@ The config used for the demonstration above:
     action: more-info
 ```
 
+### Configuration options
+You can add global options to ```deep_press``` at the root of your lovelace config
+| Name | Type | Requirement | Description | Default
+| ---- | ---- | ------- | ----------- | -------
+| enable_unsupported | boolean | **Optional** | Enable on unsupported devices | false
+
+### Example Configuration
+```yaml
+resources:
+  - url: /local/deep-press.js
+    type: module
+
+deep_press:
+  enable_unsupported: true
+
+views:
+  ...
+```
+## Unsupported devices
+```deep_press``` will fall back to use hold time just as a regular tap-action on devices </br>
+that does not support force-touch.</br>
+*Note: Some devices dont work well with the fall-back method. This is a problem with the underlying library unfortunately.*
+
+
 ## Notes
 This is based a lot on [card-mod](https://github.com/thomasloven/lovelace-card-mod) and it uses the same technique to alter existing cards.</br>
 The library used to enable deep pressing is [Pressure.js](https://github.com/stuyam/pressure).</br>
