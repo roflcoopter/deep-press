@@ -70,7 +70,8 @@ The config used for the demonstration above:
 ```
 
 ### Configuration options
-You can add global options to ```deep_press``` at the root of your lovelace config
+You can add global options to ```deep_press``` at the root of your lovelace config.
+
 | Name | Type | Requirement | Description | Default
 | ---- | ---- | ------- | ----------- | -------
 | enable_unsupported | boolean | **Optional** | Enable on unsupported devices | false
