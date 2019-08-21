@@ -8,9 +8,12 @@ customElements.whenDefined('card-tools').then(() => {
   let cardTools = customElements.get('card-tools');
 
   // Set global config
-  const enableUnsupported = (cardTools.lovelace.config.deep_press.enable_unsupported == null) ? false : cardTools.lovelace.config.deep_press.enable_unsupported;
+  const defaults = {
+      enable_unsupported: false,
+  };
+  var config = Object.assign({}, defaults, cardTools.lovelace.config.deep_press);
 
-  if('ontouchforcechange' in document === false && enableUnsupported == false){
+  if('ontouchforcechange' in document === false && config.enable_unsupported == false){
     return; // disable if device doesnt support force-touch
   }
 
@@ -94,6 +97,7 @@ customElements.whenDefined('card-tools').then(() => {
 
     Pressure.set(root.cover, {
       start: function(event){
+        this.hold = false;
         this.deep_press = false;
         this.view = document
                       .querySelector("body > home-assistant")
@@ -120,7 +124,6 @@ customElements.whenDefined('card-tools').then(() => {
 
       end: function(){
         this.view.style.webkitFilter= 'blur(0px)';
-        this.hold = false;
       },
     });
   }
