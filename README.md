@@ -97,6 +97,7 @@ that does not support force-touch.</br>
 ## Notes
 This is based a lot on [card-mod](https://github.com/thomasloven/lovelace-card-mod) and it uses the same technique to alter existing cards.</br>
 The library used to enable deep pressing is [Pressure.js](https://github.com/stuyam/pressure).</br>
+[custom-card-helpers](https://github.com/custom-cards/custom-card-helpers) is used to handle clicks. </br>
 README is based on the layout from [simple-weather-card](https://github.com/kalkih/simple-weather-card).
 
 ## License
