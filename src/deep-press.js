@@ -3,6 +3,7 @@ import {
 } from 'custom-card-helpers';
 
 import Pressure from 'pressure';
+import * as Bowser from 'bowser';
 
 customElements.whenDefined('card-tools').then(() => {
   let cardTools = customElements.get('card-tools');
@@ -16,6 +17,16 @@ customElements.whenDefined('card-tools').then(() => {
   if('ontouchforcechange' in document === false && config.enable_unsupported == false){
     return; // disable if device doesnt support force-touch
   }
+
+  // https://community.home-assistant.io/t/lovelace-button-card/65981/1933
+  const br = Bowser.getParser(window.navigator.userAgent);
+  const isCrazyBrowser = br.satisfies({
+    mobile: {
+      safari: '>=13',
+    },
+  });
+  const ios13 = new RegExp('^13\\..*', 'gm');
+  const isCrazyBrowser2 = br.getOSName() === 'iOS' && (br.getOSVersion().match(ios13) ? true : false);
 
   const setModalBehaviour = function(enable_clicks) {
     var modal = document.querySelector("body > home-assistant").shadowRoot.querySelector("ha-more-info-dialog");
@@ -84,11 +95,14 @@ customElements.whenDefined('card-tools').then(() => {
     // Create a cover which captures the deep press
     root.cover = document.createElement("div");
     root.cover.setAttribute("id", "deep-press-cover");
-    root.cover.onclick = function(event) { if (this.hold) { event.stopPropagation(); } }; // Catch click method so we can stop propagation
-    root.cover.onmouseup = function(event) { if (this.hold) { event.stopPropagation(); } }; // Catch click method so we can stop propagation
-    root.cover.ontouchend = function(event) { if (this.hold) { event.stopPropagation(); } }; // Catch click method so we can stop propagation
-    root.cover.onmousedown = function(event) { event.stopPropagation(); }; // Catch click method so we can stop propagation
-    root.cover.ontouchstart = function(event) { event.stopPropagation(); }; // Catch click method so we can stop propagation
+    root.cover.onmouseup = function(event) { if (this.hold) { event.stopPropagation(); } };
+    root.cover.ontouchend = function(event) { if (this.hold) { event.stopPropagation(); } };
+    root.cover.ontouchstart = function(event) { event.stopPropagation(); };
+    if (!isCrazyBrowser && !isCrazyBrowser2) {
+      root.cover.onmousedown = function(event) { event.stopPropagation(); };
+      root.cover.onclick = function(event) { if (this.hold) { event.stopPropagation(); } };
+    }
+
     root.cover.setAttribute(
       "style",
       "position:absolute; top:0; left:0; width:100%; height: 100%;"

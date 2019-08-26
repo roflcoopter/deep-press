@@ -33,6 +33,8 @@
   },
   "dependencies": {
     "custom-card-helpers": "^1.2.2",
-    "pressure": "^2.1.2"
+    "pressure": "^2.1.2",
+    "forceify": "latest",
+    "bowser": "^2.5.2"
   }
 }
