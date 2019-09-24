@@ -130,7 +130,10 @@ customElements.whenDefined('card-tools').then(() => {
   function _cancel(event) {
     event.stopPropagation();
     this.cancel = true;
-    this.view.style.webkitFilter= 'blur(0px)';
+    try {
+      this.view.style.webkitFilter= 'blur(0px)'; // Undefined at start
+    } catch (TypeError) {
+    }
   }
 
   const addCover = function(root) {
