@@ -56,8 +56,7 @@ customElements.whenDefined('card-tools').then(() => {
         setTimeout(function() {
           setModalBehaviour(true);
         }, 100);
-      },
-      { passive: true },
+      }
     );
   });
 
@@ -67,7 +66,11 @@ customElements.whenDefined('card-tools').then(() => {
           clickEvent.initEvent(eventType, true, true);
           targetNode.dispatchEvent(clickEvent);
       }
-      ['click','touchend'].forEach(function(eventType) {
+      [
+        'touchstart',
+        'touchend',
+        'click'
+      ].forEach(function(eventType) {
           triggerEvent(targetNode, eventType);
       });
   };
@@ -76,7 +79,61 @@ customElements.whenDefined('card-tools').then(() => {
     event.stopPropagation();
   };
 
-  const addCover = function(root, config) {
+  function _start() {
+    this.cancel = false;
+    this.event_over = false;
+    this.hold = false;
+    this.deep_press = false;
+    this.view = document
+                  .querySelector("body > home-assistant")
+                  .shadowRoot.querySelector("home-assistant-main")
+                  .shadowRoot.querySelector("app-drawer-layout > partial-panel-resolver > ha-panel-lovelace")
+                  .shadowRoot.querySelector("hui-root")
+                  .shadowRoot.querySelector("#view > hui-view");
+  };
+
+  function _change(force) {
+    if (this.cancel) {
+      return
+    }
+    if (force > 0.2) {
+      this.view.style.webkitFilter = 'blur(' + Pressure.map(force, 0.2, 0.5, 0, 10) + 'px)';
+      this.hold = true;
+    };
+  };
+
+  function _deep(root) {
+    if (this.cancel) {
+      return
+    }
+    if (!this.deep_press) {
+      this.deep_press = true;
+      handleClick(root, root.hass, root.config, true, false);
+      setModalBehaviour(false);
+    };
+  };
+
+  function _end(root) {
+    if (this.cancel) {
+      return
+    }
+    this.view.style.webkitFilter= 'blur(0px)';
+    // If hold wasnt detected, simulate a click on the element to trigger default actions of the underlying card
+    if (!this.hold && !this.event_over) {
+      simulateClick(root);
+    };
+    this.event_over = true;
+    this.hold = false;
+    this.deep_press = false;
+  };
+
+  function _cancel(event) {
+    event.stopPropagation();
+    this.cancel = true;
+    this.view.style.webkitFilter= 'blur(0px)';
+  }
+
+  const addCover = function(root) {
     // Check if cover is already applied
     if(root.querySelector(":scope >#deep-press-cover"))
       return;
@@ -90,50 +147,50 @@ customElements.whenDefined('card-tools').then(() => {
     );
     root.appendChild(root.cover);
 
-    // Stop propagation of all events. A click will be simulated when we deem necessary
-    root.cover.addEventListener('touchstart', stopProp, { passive: true });
-    root.cover.addEventListener('touchend', stopProp, { passive: true });
-    root.cover.addEventListener('touchcancel', stopProp, { passive: true });
-    root.cover.addEventListener('mousedown', stopProp, { passive: true });
-    root.cover.addEventListener('mouseup', stopProp, { passive: true });
-    root.cover.addEventListener('click', stopProp, { passive: true });
+    // Start events
+    [
+      'touchstart',
+      'mousedown',
+      'click'
+    ].forEach(function (eventName) {
+      root.cover.addEventListener(eventName, stopProp, { passive: true });
+    });
+
+    // End events
+    [
+      'touchend',
+      'mouseup'
+    ].forEach(function (eventName) {
+      root.cover.addEventListener(eventName, function(){ _end.call(this, root); }, { passive: true });
+    });
+
+    // Canceling events
+    [
+      'touchcancel',
+      'mouseout',
+      'touchmove',
+      'mousewheel',
+      'wheel',
+      'scroll'
+    ].forEach(function (eventName) {
+      root.cover.addEventListener(eventName, function(event){ _cancel.call(this, event); }, { passive: true });
+    });
 
     Pressure.set(root.cover, {
       start: function(event){
-        this.hold = false;
-        this.deep_press = false;
-        this.view = document
-                      .querySelector("body > home-assistant")
-                      .shadowRoot.querySelector("home-assistant-main")
-                      .shadowRoot.querySelector("app-drawer-layout > partial-panel-resolver > ha-panel-lovelace")
-                      .shadowRoot.querySelector("hui-root")
-                      .shadowRoot.querySelector("#view > hui-view");
+        _start.call(this);
       },
 
       change: function(force, event){
-        if (force > 0.2) {
-          this.view.style.webkitFilter = 'blur(' + Pressure.map(force, 0.2, 0.5, 0, 10) + 'px)';
-          this.hold = true;
-        }
+        _change.call(this, force);
       },
 
       startDeepPress: function(event){
-        if (!this.deep_press) {
-          this.deep_press = true;
-          handleClick(this, root.hass, config, true, false);
-          setModalBehaviour(false);
-        }
+        _deep.call(this, root);
       },
 
-      // Called when deep press ends
       end: function(){
-        this.view.style.webkitFilter= 'blur(0px)';
-        // If hold wasnt detected, simulate a click on the element to trigger default actions of the underlying card
-        if (!this.hold) {
-          simulateClick(root);
-        };
-        this.hold = false;
-        this.deep_press = false;
+        _end.call(this, root);
       },
     });
   }
@@ -156,9 +213,9 @@ customElements.whenDefined('card-tools').then(() => {
   HaCard.prototype.update = function(e){
     // Call the original update method, then create cover element
     cached_update.apply(this, e);
-    const config = findConfig(this);
-    if(config && config.deep_press) {
-      addCover(this, config);
+    const card_config = findConfig(this);
+    if(card_config && card_config.deep_press) {
+      addCover(this);
     }
   };
 });
