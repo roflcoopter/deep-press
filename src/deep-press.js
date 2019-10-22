@@ -10,15 +10,15 @@ customElements.whenDefined('card-tools').then(() => {
 
   // Set global config
   const defaults = {
-      enable_unsupported: false,
+    enable_unsupported: false,
   };
   var config = Object.assign({}, defaults, cardTools.lovelace.config.deep_press);
 
-  if('ontouchforcechange' in document === false && config.enable_unsupported == false){
+  if ('ontouchforcechange' in document === false && config.enable_unsupported == false) {
     return; // disable if device doesnt support force-touch
   }
 
-  const setModalBehaviour = function(enable_clicks) {
+  const setModalBehaviour = function (enable_clicks) {
     var modal = document.querySelector("body > home-assistant").shadowRoot.querySelector("ha-more-info-dialog");
     if (modal) {
       if (enable_clicks) {
@@ -31,15 +31,15 @@ customElements.whenDefined('card-tools').then(() => {
     }
   };
 
-  const removeBlur = function() {
+  const removeBlur = function () {
     try {
       document.querySelector("body > home-assistant")
-              .shadowRoot.querySelector("home-assistant-main")
-              .shadowRoot.querySelector("app-drawer-layout > partial-panel-resolver > ha-panel-lovelace")
-              .shadowRoot.querySelector("hui-root")
-              .shadowRoot.querySelector("#view > hui-view")
-              .style.webkitFilter= 'blur(0px)';
-    } catch(err) {
+        .shadowRoot.querySelector("home-assistant-main")
+        .shadowRoot.querySelector("app-drawer-layout > partial-panel-resolver > ha-panel-lovelace")
+        .shadowRoot.querySelector("hui-root")
+        .shadowRoot.querySelector("#view > hui-view")
+        .style.webkitFilter = 'blur(0px)';
+    } catch (err) {
       if (!(err instanceof TypeError)) {
         throw err
       }
@@ -53,29 +53,29 @@ customElements.whenDefined('card-tools').then(() => {
     document.addEventListener(ev,
       () => {
         removeBlur();
-        setTimeout(function() {
+        setTimeout(function () {
           setModalBehaviour(true);
         }, 100);
       }
     );
   });
 
-  const simulateClick = function(targetNode) {
-      function triggerEvent(targetNode, eventType) {
-          var clickEvent = document.createEvent('MouseEvents');
-          clickEvent.initEvent(eventType, true, true);
-          targetNode.dispatchEvent(clickEvent);
-      }
-      [
-        'touchstart',
-        'touchend',
-        'click'
-      ].forEach(function(eventType) {
-          triggerEvent(targetNode, eventType);
-      });
+  const simulateClick = function (targetNode) {
+    function triggerEvent(targetNode, eventType) {
+      var clickEvent = document.createEvent('MouseEvents');
+      clickEvent.initEvent(eventType, true, true);
+      targetNode.dispatchEvent(clickEvent);
+    }
+    [
+      'touchstart',
+      'touchend',
+      'click'
+    ].forEach(function (eventType) {
+      triggerEvent(targetNode, eventType);
+    });
   };
 
-  const stopProp = function(event) {
+  const stopProp = function (event) {
     event.stopPropagation();
   };
 
@@ -85,15 +85,15 @@ customElements.whenDefined('card-tools').then(() => {
     this.hold = false;
     this.deep_press = false;
     this.view = document
-                  .querySelector("body > home-assistant")
-                  .shadowRoot.querySelector("home-assistant-main")
-                  .shadowRoot.querySelector("app-drawer-layout > partial-panel-resolver > ha-panel-lovelace")
-                  .shadowRoot.querySelector("hui-root")
-                  .shadowRoot.querySelector("#view > hui-view");
+      .querySelector("body > home-assistant")
+      .shadowRoot.querySelector("home-assistant-main")
+      .shadowRoot.querySelector("app-drawer-layout > partial-panel-resolver > ha-panel-lovelace")
+      .shadowRoot.querySelector("hui-root")
+      .shadowRoot.querySelector("#view > hui-view");
   };
 
   function _change(force) {
-    if (this.cancel) {
+    if (this.cancel || this.deep_press) {
       return
     }
     if (force > 0.2) {
@@ -108,8 +108,9 @@ customElements.whenDefined('card-tools').then(() => {
     }
     if (!this.deep_press) {
       this.deep_press = true;
-      handleClick(root, root.hass, root.config, true, false);
+      handleClick(root, cardTools.hass, root.config, true, false);
       setModalBehaviour(false);
+      this.view.style.webkitFilter = 'blur(0px)';
     };
   };
 
@@ -117,7 +118,7 @@ customElements.whenDefined('card-tools').then(() => {
     if (this.cancel) {
       return
     }
-    this.view.style.webkitFilter= 'blur(0px)';
+    this.view.style.webkitFilter = 'blur(0px)';
     // If hold wasnt detected, simulate a click on the element to trigger default actions of the underlying card
     if (!this.hold && !this.event_over) {
       simulateClick(root);
@@ -131,14 +132,14 @@ customElements.whenDefined('card-tools').then(() => {
     event.stopPropagation();
     this.cancel = true;
     try {
-      this.view.style.webkitFilter= 'blur(0px)'; // Undefined at start
+      this.view.style.webkitFilter = 'blur(0px)'; // Undefined at start
     } catch (TypeError) {
     }
   }
 
-  const addCover = function(root) {
+  const addCover = function (root) {
     // Check if cover is already applied
-    if(root.querySelector(":scope >#deep-press-cover"))
+    if (root.querySelector(":scope >#deep-press-cover"))
       return;
 
     // Create a cover which captures the deep press
@@ -164,7 +165,7 @@ customElements.whenDefined('card-tools').then(() => {
       'touchend',
       'mouseup'
     ].forEach(function (eventName) {
-      root.cover.addEventListener(eventName, function(){ _end.call(this, root); }, { passive: true });
+      root.cover.addEventListener(eventName, function () { _end.call(this, root); }, { passive: true });
     });
 
     // Canceling events
@@ -176,48 +177,48 @@ customElements.whenDefined('card-tools').then(() => {
       'wheel',
       'scroll'
     ].forEach(function (eventName) {
-      root.cover.addEventListener(eventName, function(event){ _cancel.call(this, event); }, { passive: true });
+      root.cover.addEventListener(eventName, function (event) { _cancel.call(this, event); }, { passive: true });
     });
 
     Pressure.set(root.cover, {
-      start: function(event){
+      start: function (event) {
         _start.call(this);
       },
 
-      change: function(force, event){
+      change: function (force, event) {
         _change.call(this, force);
       },
 
-      startDeepPress: function(event){
+      startDeepPress: function (event) {
         _deep.call(this, root);
       },
 
-      end: function(){
+      end: function () {
         _end.call(this, root);
       },
     });
   }
 
-  const findConfig = function(node) {
-    if(node.config)
+  const findConfig = function (node) {
+    if (node.config)
       return node.config;
-    if(node._config)
+    if (node._config)
       return node._config;
-    if(node.host)
+    if (node.host)
       return findConfig(node.host);
-    if(node.parentElement)
+    if (node.parentElement)
       return findConfig(node.parentElement);
-    if(node.parentNode)
+    if (node.parentNode)
       return findConfig(node.parentNode);
     return null;
   };
 
   var cached_update = HaCard.prototype.update;
-  HaCard.prototype.update = function(e){
+  HaCard.prototype.update = function (e) {
     // Call the original update method, then create cover element
     cached_update.apply(this, e);
     const card_config = findConfig(this);
-    if(card_config && card_config.deep_press) {
+    if (card_config && card_config.deep_press) {
       addCover(this);
     }
   };
