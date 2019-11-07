@@ -75,8 +75,18 @@ customElements.whenDefined('card-tools').then(() => {
     });
   };
 
-  const stopProp = function (event) {
+  const startEvent = function (root, event) {
+    /* We have to stop propagation to prevent the underlying cards actions to trigger.
+       HOWEVER, if we stop propagation, things like swiper-card doesnt work. 
+       To solve this i redispatch the same even on the cards parent. Superhacky.
+    */
     event.stopPropagation();
+    try {
+      root.parentElement.dispatchEvent(new event.constructor(event.type, event));
+    } catch (TypeError) {
+      root.getRootNode().host.dispatchEvent(new event.constructor(event.type, event));
+    }
+
   };
 
   function _start() {
@@ -129,7 +139,6 @@ customElements.whenDefined('card-tools').then(() => {
   };
 
   function _cancel(event) {
-    event.stopPropagation();
     this.cancel = true;
     try {
       this.view.style.webkitFilter = 'blur(0px)'; // Undefined at start
@@ -137,11 +146,12 @@ customElements.whenDefined('card-tools').then(() => {
     }
   }
 
-  const addCover = function (root) {
+  const addCover = function (root, config) {
     // Check if cover is already applied
     if (root.querySelector(":scope >#deep-press-cover"))
       return;
 
+    root.config = config
     // Create a cover which captures the deep press
     root.cover = document.createElement("div");
     root.cover.setAttribute("id", "deep-press-cover");
@@ -157,7 +167,7 @@ customElements.whenDefined('card-tools').then(() => {
       'mousedown',
       'click'
     ].forEach(function (eventName) {
-      root.cover.addEventListener(eventName, stopProp, { passive: true });
+      root.cover.addEventListener(eventName, function (event) { startEvent.call(this, root, event); }, { passive: true });
     });
 
     // End events
@@ -165,7 +175,7 @@ customElements.whenDefined('card-tools').then(() => {
       'touchend',
       'mouseup'
     ].forEach(function (eventName) {
-      root.cover.addEventListener(eventName, function () { _end.call(this, root); }, { passive: true });
+      root.cover.addEventListener(eventName, function (event) { _end.call(this, root, event); }, { passive: true });
     });
 
     // Canceling events
@@ -194,7 +204,8 @@ customElements.whenDefined('card-tools').then(() => {
       },
 
       end: function () {
-        _end.call(this, root);
+        _end.call(this, root)
+        this.view.style.webkitFilter = 'blur(0px)';
       },
     });
   }
@@ -218,8 +229,14 @@ customElements.whenDefined('card-tools').then(() => {
     // Call the original update method, then create cover element
     cached_update.apply(this, e);
     const card_config = findConfig(this);
-    if (card_config && card_config.deep_press) {
-      addCover(this);
+    if (card_config && card_config.deep_press && card_config.hold_action) {
+      addCover(this, card_config);
     }
   };
 });
+
+console.info(
+  `%cdeep-press\n%cVersion: 1.2.3b4`,
+  "color: green; font-weight: bold;",
+  ""
+);
