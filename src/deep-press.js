@@ -236,7 +236,7 @@ customElements.whenDefined('card-tools').then(() => {
 });
 
 console.info(
-  `%cdeep-press\n%cVersion: 1.2.3b4`,
+  `%cdeep-press\n%cVersion: 1.2.3b5`,
   "color: green; font-weight: bold;",
   ""
 );
