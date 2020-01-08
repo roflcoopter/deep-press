@@ -28,6 +28,10 @@ customElements.whenDefined('card-tools').then(() => {
         modal.noCancelOnOutsideClick = true;
         modal.style.pointerEvents = "none";
       }
+    } else {
+      setTimeout(function () {
+        setModalBehaviour(enable_clicks);
+      }, 100);
     }
   };
 
@@ -120,7 +124,6 @@ customElements.whenDefined('card-tools').then(() => {
       this.deep_press = true;
       handleClick(root, cardTools.hass, root.config, true, false);
       setModalBehaviour(false);
-      this.view.style.webkitFilter = 'blur(0px)';
     };
   };
 
