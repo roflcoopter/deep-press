@@ -5,7 +5,7 @@ It can be used to mimic an iOS interface.
 ![deep-press](https://user-images.githubusercontent.com/26493864/61529951-f951ac00-aa22-11e9-8203-230ec5364a7c.GIF)
 
 ## Install
-
+First of all, [card-tools](https://github.com/thomasloven/lovelace-card-tools) is required.
 ### HACS
 
 1. Add `https://github.com/roflcoopter/deep-press` as a custom repository.
