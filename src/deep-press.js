@@ -239,7 +239,7 @@ customElements.whenDefined('card-tools').then(() => {
 });
 
 console.info(
-  `%cdeep-press\n%cVersion: 1.2.3b5`,
+  `%cdeep-press\n%cVersion: 1.2.4`,
   "color: green; font-weight: bold;",
   ""
 );
