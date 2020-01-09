@@ -66,17 +66,27 @@ customElements.whenDefined('card-tools').then(() => {
     );
   });
 
+  if ("ontouchstart" in document.documentElement) {
+    var clickEventList = [
+      'touchstart',
+      'touchend',
+      'click'
+    ]
+  } else {
+    var clickEventList = [
+      'mousedown',
+      'mouseup',
+      'click'
+    ]
+  }
+
   const simulateClick = function (targetNode) {
     function triggerEvent(targetNode, eventType) {
       var clickEvent = document.createEvent('MouseEvents');
       clickEvent.initEvent(eventType, true, true);
       targetNode.dispatchEvent(clickEvent);
     }
-    [
-      'touchstart',
-      'touchend',
-      'click'
-    ].forEach(function (eventType) {
+    clickEventList.forEach(function (eventType) {
       triggerEvent(targetNode, eventType);
     });
   };
@@ -241,7 +251,7 @@ customElements.whenDefined('card-tools').then(() => {
 });
 
 console.info(
-  `%cdeep-press\n%cVersion: 1.2.4`,
+  `%cdeep-press\n%cVersion: 1.2.5`,
   "color: green; font-weight: bold;",
   ""
 );
