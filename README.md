@@ -18,29 +18,11 @@ First of all, [card-tools](https://github.com/thomasloven/lovelace-card-tools) i
         type: module
     ```
 
-### Simple install
+### Manual install
 
 1. Download and copy `deep-press.js` from the [latest release](https://github.com/roflcoopter/deep-press/releases/latest) into your `config/www` directory.
 
 2. Add a reference to `deep-press.js` inside your `ui-lovelace.yaml` or through the raw config editor interface.
-
-    ```yaml
-    resources:
-      - url: /local/deep-press.js
-        type: module
-    ```
-
-### CLI install
-
-1. Move into your `config/www` directory
-
-2. Download `deep-press.js`
-
-    ```console
-    $ wget https://github.com/roflcoopter/deep-press/releases/download/v0.1.0/deep-press.js
-    ```
-
-3. Add a reference to `deep-press.js` inside your `ui-lovelace.yaml` or through the raw config editor interface.
 
     ```yaml
     resources:
