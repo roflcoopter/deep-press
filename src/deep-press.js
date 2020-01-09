@@ -18,7 +18,7 @@ customElements.whenDefined('card-tools').then(() => {
     return; // disable if device doesnt support force-touch
   }
 
-  const setModalBehaviour = function (enable_clicks) {
+  const setModalBehaviour = function (enable_clicks, retry) {
     var modal = document.querySelector("body > home-assistant").shadowRoot.querySelector("ha-more-info-dialog");
     if (modal) {
       if (enable_clicks) {
@@ -29,9 +29,11 @@ customElements.whenDefined('card-tools').then(() => {
         modal.style.pointerEvents = "none";
       }
     } else {
-      setTimeout(function () {
-        setModalBehaviour(enable_clicks);
-      }, 100);
+      if (retry) { //retry once, needed for popup cards that load slowly
+        setTimeout(function () {
+          setModalBehaviour(enable_clicks, false);
+        }, 100);
+      }
     }
   };
 
@@ -58,7 +60,7 @@ customElements.whenDefined('card-tools').then(() => {
       () => {
         removeBlur();
         setTimeout(function () {
-          setModalBehaviour(true);
+          setModalBehaviour(true, false);
         }, 100);
       }
     );
@@ -123,7 +125,7 @@ customElements.whenDefined('card-tools').then(() => {
     if (!this.deep_press) {
       this.deep_press = true;
       handleClick(root, cardTools.hass, root.config, true, false);
-      setModalBehaviour(false);
+      setModalBehaviour(false, true);
     };
   };
 
