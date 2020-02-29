@@ -1,6 +1,6 @@
 import {
   setModalBehaviour,
-  removeBlur
+  removeBlur,
 } from './helpers'
 
 import DeepPress from './deep-press'
@@ -12,10 +12,11 @@ customElements.whenDefined('card-tools').then(() => {
   // Set global config
   const defaults = {
     enable_unsupported: false,
+    animations: true,
   };
-  var config = Object.assign({}, defaults, cardTools.lovelace.config.deep_press);
+  var deep_press_config = Object.assign({}, defaults, cardTools.lovelace.config.deep_press);
 
-  if ('ontouchforcechange' in document === false && config.enable_unsupported == false) {
+  if ('ontouchforcechange' in document === false && deep_press_config.enable_unsupported == false) {
     return; // disable if device doesnt support force-touch
   }
 
@@ -47,7 +48,7 @@ customElements.whenDefined('card-tools').then(() => {
     return null;
   };
 
-  function addCover(config) {
+  function addCover(deep_press_config, card_config) {
     // Check if cover is already applied
     if (this.querySelector(":scope >#deep-press-cover"))
       return;
@@ -57,11 +58,12 @@ customElements.whenDefined('card-tools').then(() => {
     cover.setAttribute("id", "deep-press-cover");
     cover.setAttribute(
       "style",
-      "position:absolute; top:0; left:0; width:100%; height: 100%;"
+      "position:absolute; top:0; left:0; width:100%; height: 100%; transition: all 2s ease-in-out; overflow: visible;"
     );
     this.appendChild(cover);
 
-    DeepPress.init.call(cover, this, config);
+    var deepPress = new DeepPress(cover, this, deep_press_config, card_config);
+    deepPress.init();
   };
 
   var cached_update = HaCard.prototype.update;
@@ -70,13 +72,13 @@ customElements.whenDefined('card-tools').then(() => {
     cached_update.apply(this, e);
     const card_config = findConfig(this);
     if (card_config && card_config.deep_press && card_config.hold_action) {
-      addCover.call(this, card_config);
+      addCover.call(this, deep_press_config, card_config);
     };
   };
 });
 
 console.info(
-  `%cdeep-press\n%cVersion: 1.2.5`,
+  `%cdeep-press\n%cVersion: 2.0.0`,
   "color: green; font-weight: bold;",
   ""
 );

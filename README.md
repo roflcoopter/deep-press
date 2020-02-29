@@ -57,6 +57,7 @@ You can add global options to ```deep_press``` at the root of your lovelace conf
 | Name | Type | Requirement | Description | Default
 | ---- | ---- | ------- | ----------- | -------
 | enable_unsupported | boolean | **Optional** | Enable on unsupported devices | false
+| animations | boolean | **Optional** | The harder you press, the smaller the div gets | true
 
 ### Example Configuration
 ```yaml

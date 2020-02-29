@@ -1,197 +1,85 @@
 import {
+  setModalBehaviour,
+  removeBlur,
+  getView,
+  scaleElement
+} from './helpers'
+
+import {
   handleClick
 } from 'custom-card-helpers';
 
 import Pressure from 'pressure';
 
-customElements.whenDefined('card-tools').then(() => {
-  let cardTools = customElements.get('card-tools');
-  const HaCard = customElements.get('ha-card');
+export default class DeepPress {
+  constructor(cover, root, deep_press_config, config) {
+    this.cover = cover;
+    this.root = root;
+    this.deep_press_config = deep_press_config;
+    this.config = config;
+    this.cover.deep_press_config = deep_press_config;
+    this.cover.config = config;
 
-  // Set global config
-  const defaults = {
-    enable_unsupported: false,
-  };
-  var config = Object.assign({}, defaults, cardTools.lovelace.config.deep_press);
-
-  if ('ontouchforcechange' in document === false && config.enable_unsupported == false) {
-    return; // disable if device doesnt support force-touch
+    this._upEvent = this.upEvent.bind(this);
   }
 
-  const setModalBehaviour = function (enable_clicks, retry) {
-    var modal = document.querySelector("body > home-assistant").shadowRoot.querySelector("ha-more-info-dialog");
-    if (modal) {
-      if (enable_clicks) {
-        modal.noCancelOnOutsideClick = false;
-        modal.style.pointerEvents = "all";
-      } else {
-        modal.noCancelOnOutsideClick = true;
-        modal.style.pointerEvents = "none";
-      }
-    } else {
-      if (retry) { //retry once, needed for popup cards that load slowly
-        setTimeout(function () {
-          setModalBehaviour(enable_clicks, false);
-        }, 100);
-      }
-    }
-  };
-
-  const removeBlur = function () {
-    try {
-      document.querySelector("body > home-assistant")
-        .shadowRoot.querySelector("home-assistant-main")
-        .shadowRoot.querySelector("app-drawer-layout > partial-panel-resolver > ha-panel-lovelace")
-        .shadowRoot.querySelector("hui-root")
-        .shadowRoot.querySelector("#view > hui-view")
-        .style.webkitFilter = 'blur(0px)';
-    } catch (err) {
-      if (!(err instanceof TypeError)) {
-        throw err
-      }
-    }
-  };
-
-  [
-    'touchend',
-    'mouseup',
-  ].forEach((ev) => {
-    document.addEventListener(ev,
-      () => {
-        removeBlur();
-        setTimeout(function () {
-          setModalBehaviour(true, false);
-        }, 100);
-      }
-    );
-  });
-
-  if ("ontouchstart" in document.documentElement) {
-    var clickEventList = [
-      'touchstart',
+  downEvent(event) {
+    // Listen for release events
+    [
       'touchend',
-      'click'
-    ]
-  } else {
-    var clickEventList = [
-      'mousedown',
       'mouseup',
       'click'
-    ]
-  }
+    ].forEach(function (eventName) {
+      this.cover.addEventListener(eventName, this._upEvent, { passive: true });
+    }, this);
 
-  const simulateClick = function (targetNode) {
-    function triggerEvent(targetNode, eventType) {
-      var clickEvent = document.createEvent('MouseEvents');
-      clickEvent.initEvent(eventType, true, true);
-      targetNode.dispatchEvent(clickEvent);
-    }
-    clickEventList.forEach(function (eventType) {
-      triggerEvent(targetNode, eventType);
-    });
-  };
-
-  const startEvent = function (root, event) {
+    this.down_event = event; // Store event. Used later to simulate a click
     /* We have to stop propagation to prevent the underlying cards actions to trigger.
        HOWEVER, if we stop propagation, things like swiper-card doesnt work. 
        To solve this i redispatch the same even on the cards parent. Superhacky.
     */
     event.stopPropagation();
     try {
-      root.parentElement.dispatchEvent(new event.constructor(event.type, event));
+      this.root.parentElement.dispatchEvent(new event.constructor(event.type, event));
     } catch (TypeError) {
-      root.getRootNode().host.dispatchEvent(new event.constructor(event.type, event));
-    }
-
-  };
-
-  function _start() {
-    this.cancel = false;
-    this.event_over = false;
-    this.hold = false;
-    this.deep_press = false;
-    this.view = document
-      .querySelector("body > home-assistant")
-      .shadowRoot.querySelector("home-assistant-main")
-      .shadowRoot.querySelector("app-drawer-layout > partial-panel-resolver > ha-panel-lovelace")
-      .shadowRoot.querySelector("hui-root")
-      .shadowRoot.querySelector("#view > hui-view");
-  };
-
-  function _change(force) {
-    if (this.cancel || this.deep_press) {
-      return
-    }
-    if (force > 0.2) {
-      this.view.style.webkitFilter = 'blur(' + Pressure.map(force, 0.2, 0.5, 0, 10) + 'px)';
-      this.hold = true;
-    };
-  };
-
-  function _deep(root) {
-    if (this.cancel) {
-      return
-    }
-    if (!this.deep_press) {
-      this.deep_press = true;
-      handleClick(root, cardTools.hass, root.config, true, false);
-      setModalBehaviour(false, true);
-    };
-  };
-
-  function _end(root) {
-    if (this.cancel) {
-      return
-    }
-    this.view.style.webkitFilter = 'blur(0px)';
-    // If hold wasnt detected, simulate a click on the element to trigger default actions of the underlying card
-    if (!this.hold && !this.event_over) {
-      simulateClick(root);
-    };
-    this.event_over = true;
-    this.hold = false;
-    this.deep_press = false;
-  };
-
-  function _cancel(event) {
-    this.cancel = true;
-    try {
-      this.view.style.webkitFilter = 'blur(0px)'; // Undefined at start
-    } catch (TypeError) {
+      this.root.getRootNode().host.dispatchEvent(new event.constructor(event.type, event));
     }
   }
 
-  const addCover = function (root, config) {
-    // Check if cover is already applied
-    if (root.querySelector(":scope >#deep-press-cover"))
+  upEvent(event) {
+    scaleElement(this.deep_press_config, this.root, 1);
+    this.cover.removeEventListener(event.type, this._upEvent, { passive: true });
+
+    if (this.cover.cancel || this.cover.hold) {
+      event.stopPropagation();
+      try {
+        this.root.parentElement.dispatchEvent(new event.constructor(event.type, event));
+      } catch (TypeError) {
+        this.root.getRootNode().host.dispatchEvent(new event.constructor(event.type, event));
+      }
       return;
+    }
+    if (event.type != 'click') {
+      this.root.dispatchEvent(new event.constructor(this.down_event.type, this.down_event));
+    };
+    this.root.dispatchEvent(new event.constructor(event.type, event));
+    removeBlur();
+  }
 
-    root.config = config
-    // Create a cover which captures the deep press
-    root.cover = document.createElement("div");
-    root.cover.setAttribute("id", "deep-press-cover");
-    root.cover.setAttribute(
-      "style",
-      "position:absolute; top:0; left:0; width:100%; height: 100%;"
-    );
-    root.appendChild(root.cover);
+  cancelEvent(event) {
+    this.cover.cancel = true;
+    scaleElement(this.deep_press_config, this.root, 1);
+    removeBlur();
+  }
 
-    // Start events
+  init() {
+    // Down events
     [
       'touchstart',
-      'mousedown',
-      'click'
+      'mousedown'
     ].forEach(function (eventName) {
-      root.cover.addEventListener(eventName, function (event) { startEvent.call(this, root, event); }, { passive: true });
-    });
-
-    // End events
-    [
-      'touchend',
-      'mouseup'
-    ].forEach(function (eventName) {
-      root.cover.addEventListener(eventName, function (event) { _end.call(this, root, event); }, { passive: true });
-    });
+      this.cover.addEventListener(eventName, this.downEvent.bind(this), { passive: true });
+    }, this);
 
     // Canceling events
     [
@@ -202,56 +90,46 @@ customElements.whenDefined('card-tools').then(() => {
       'wheel',
       'scroll'
     ].forEach(function (eventName) {
-      root.cover.addEventListener(eventName, function (event) { _cancel.call(this, event); }, { passive: true });
-    });
+      this.cover.addEventListener(eventName, this.cancelEvent.bind(this), { passive: true });
+    }, this);
 
-    Pressure.set(root.cover, {
+    Pressure.set(this.cover, {
       start: function (event) {
-        _start.call(this);
+        this.cancel = false;
+        this.event_over = false;
+        this.hold = false;
+        this.deep_press = false;
+        this.view = getView();
       },
 
       change: function (force, event) {
-        _change.call(this, force);
+        if (this.cancel || this.deep_press) {
+          return
+        }
+        if (force > 0.2) {
+          this.view.style.webkitFilter = 'blur(' + Pressure.map(force, 0.2, 0.5, 0, 10) + 'px)';
+          scaleElement(this.deep_press_config, this.parentElement, Pressure.map(force, 0.2, 0.5, 1, 0.5));
+          this.hold = true;
+        };
       },
 
       startDeepPress: function (event) {
-        _deep.call(this, root);
+        if (this.cancel) {
+          return
+        }
+        if (!this.deep_press) {
+          this.deep_press = true;
+          scaleElement(this.deep_press_config, this.parentElement, 1);
+          handleClick(this.parentElement, cardTools.hass, this.config, true, false);
+          setModalBehaviour(false, true);
+          removeBlur();
+        };
       },
 
       end: function () {
-        _end.call(this, root)
-        this.view.style.webkitFilter = 'blur(0px)';
+        scaleElement(this.deep_press_config, this.parentElement, 1);
+        removeBlur();
       },
     });
   }
-
-  const findConfig = function (node) {
-    if (node.config)
-      return node.config;
-    if (node._config)
-      return node._config;
-    if (node.host)
-      return findConfig(node.host);
-    if (node.parentElement)
-      return findConfig(node.parentElement);
-    if (node.parentNode)
-      return findConfig(node.parentNode);
-    return null;
-  };
-
-  var cached_update = HaCard.prototype.update;
-  HaCard.prototype.update = function (e) {
-    // Call the original update method, then create cover element
-    cached_update.apply(this, e);
-    const card_config = findConfig(this);
-    if (card_config && card_config.deep_press && card_config.hold_action) {
-      addCover(this, card_config);
-    }
-  };
-});
-
-console.info(
-  `%cdeep-press\n%cVersion: 1.2.5`,
-  "color: green; font-weight: bold;",
-  ""
-);
+};

@@ -17,17 +17,49 @@ export const setModalBehaviour = function (enable_clicks, retry) {
   }
 };
 
-export const removeBlur = function () {
-  try {
-    document.querySelector("body > home-assistant")
+export const getView = function () {
+  return document
+    .querySelector("body > home-assistant")
+    .shadowRoot.querySelector("home-assistant-main")
+    .shadowRoot.querySelector("app-drawer-layout > partial-panel-resolver > ha-panel-lovelace")
+    .shadowRoot.querySelector("hui-root")
+    .shadowRoot.querySelector("#view > hui-view") ?
+    document
+      .querySelector("body > home-assistant")
       .shadowRoot.querySelector("home-assistant-main")
       .shadowRoot.querySelector("app-drawer-layout > partial-panel-resolver > ha-panel-lovelace")
       .shadowRoot.querySelector("hui-root")
-      .shadowRoot.querySelector("#view > hui-view")
-      .style.webkitFilter = 'blur(0px)';
+      .shadowRoot.querySelector("#view > hui-view") :
+    document
+      .querySelector("body > home-assistant")
+      .shadowRoot.querySelector("home-assistant-main")
+      .shadowRoot.querySelector("app-drawer-layout > partial-panel-resolver > ha-panel-lovelace")
+      .shadowRoot.querySelector("hui-root")
+      .shadowRoot.querySelector("#view > hui-panel-view");
+}
+
+export const removeBlur = function () {
+  try {
+    getView().style.webkitFilter = 'blur(0px)';
   } catch (err) {
     if (!(err instanceof TypeError)) {
       throw err
     }
   }
+};
+
+export const setIntervalNTimes = (fn, delay, times) => {
+  if (!times) return;
+
+  setTimeout(() => {
+    fn();
+    setIntervalNTimes(fn, delay, times - 1)
+  }, delay);
+};
+
+
+export const scaleElement = function (config, element, scale) {
+  if (config.animations) {
+    element.style.transform = "scale(" + scale + ")";
+  };
 };
