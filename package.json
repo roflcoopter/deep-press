@@ -1,6 +1,6 @@
 {
   "name": "deep-press",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Adds deep press (3D touch) to Lovelace cards",
   "main": "src/deep-press.js",
   "scripts": {
@@ -35,6 +35,7 @@
   "dependencies": {
     "custom-card-helpers": "^1.3.2",
     "pressure": "^2.1.2",
-    "forceify": "latest"
+    "forceify": "latest",
+    "card-tools": "github:thomasloven/lovelace-card-tools"
   }
 }

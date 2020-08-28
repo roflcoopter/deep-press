@@ -1,8 +1,10 @@
 module.exports = {
-  entry: './src/deep-press.js',
+  entry: './src/main.js',
   output: {
-    filename: 'deep-press.js'
+    filename: 'deep-press.js',
+    // path: '/workspace/hass/www/community/deep-press/'
   },
+  // devtool: '#inline-source-map',
   module: {
     rules: [
       {
@@ -21,7 +23,8 @@ module.exports = {
               ],
             ],
             plugins: [
-              ["@babel/plugin-transform-template-literals"]
+              "@babel/plugin-transform-template-literals",
+              "@babel/plugin-proposal-class-properties"
             ],
           },
         },
