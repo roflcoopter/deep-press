@@ -1,6 +1,6 @@
 {
   "name": "deep-press",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Adds deep press (3D touch) to Lovelace cards",
   "main": "src/deep-press.js",
   "scripts": {

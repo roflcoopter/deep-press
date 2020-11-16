@@ -28,7 +28,7 @@ export default class DeepPress {
     [
       'touchend',
       'mouseup',
-      'click'
+      // 'click'
     ].forEach(function (eventName) {
       this.cover.addEventListener(eventName, this._upEvent, { passive: true });
     }, this);
