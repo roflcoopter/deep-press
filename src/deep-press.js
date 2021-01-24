@@ -26,37 +26,29 @@ export default class DeepPress {
   downEvent(event) {
     // Listen for release events
     [
-      'touchend',
-      'mouseup',
-      // 'click'
+      // 'touchend',
+      // 'mouseup',
+      'click'
     ].forEach(function (eventName) {
-      this.cover.addEventListener(eventName, this._upEvent, { passive: true });
+      this.cover.addEventListener(eventName, this._upEvent, { passive: true, capture: true });
     }, this);
 
-    this.down_event = event; // Store event. Used later to simulate a click
+    this.down_event = Object.assign({}, event); // Store event. Used later to simulate a click
     /* We have to stop propagation to prevent the underlying cards actions to trigger.
        HOWEVER, if we stop propagation, things like swiper-card doesnt work. 
        To solve this i redispatch the same even on the cards parent. Superhacky.
     */
     event.stopPropagation();
-    try {
-      this.root.parentElement.dispatchEvent(new event.constructor(event.type, event));
-    } catch (TypeError) {
-      this.root.getRootNode().host.dispatchEvent(new event.constructor(event.type, event));
-    }
+    getView().dispatchEvent(new event.constructor(event.type, event));
   }
 
   upEvent(event) {
     scaleElement(this.deep_press_config, this.root, 1);
-    this.cover.removeEventListener(event.type, this._upEvent, { passive: true });
+    this.cover.removeEventListener(event.type, this._upEvent, { passive: true, capture: true });
 
     if (this.cover.cancel || this.cover.hold) {
       event.stopPropagation();
-      try {
-        this.root.parentElement.dispatchEvent(new event.constructor(event.type, event));
-      } catch (TypeError) {
-        this.root.getRootNode().host.dispatchEvent(new event.constructor(event.type, event));
-      }
+      getView().dispatchEvent(new event.constructor(event.type, event));
       return;
     }
     if (event.type != 'click') {
@@ -78,7 +70,7 @@ export default class DeepPress {
       'touchstart',
       'mousedown'
     ].forEach(function (eventName) {
-      this.cover.addEventListener(eventName, this.downEvent.bind(this), { passive: true });
+      this.cover.addEventListener(eventName, this.downEvent.bind(this), { passive: true, capture: true });
     }, this);
 
     // Canceling events
@@ -90,7 +82,7 @@ export default class DeepPress {
       'wheel',
       'scroll'
     ].forEach(function (eventName) {
-      this.cover.addEventListener(eventName, this.cancelEvent.bind(this), { passive: true });
+      this.cover.addEventListener(eventName, this.cancelEvent.bind(this), { passive: true, capture: true });
     }, this);
 
     Pressure.set(this.cover, {
