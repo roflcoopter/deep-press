@@ -99,7 +99,7 @@ const initialize = () => {
 waitForLovelace()
 
 console.info(
-  `%cdeep-press\n%cVersion: 2.1.2`,
+  `%cdeep-press\n%cVersion: 2.1.3`,
   "color: green; font-weight: bold;",
   ""
 );
